@@ -1,0 +1,9 @@
+# Python scripts (not needed for GitHub Pages)
+sync_data.py
+deploy_gist.py
+sync_config.json
+
+# Uploads and temp files
+*.pyc
+__pycache__/
+.uploads/

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>亚马逊全站点类目大盘看板</title>
+<style>
+  @font-face { font-family: 'Outfit'; src: url('./_shared/fonts/Outfit-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+  @font-face { font-family: 'Outfit'; src: url('./_shared/fonts/Outfit-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+  @font-face { font-family: 'InstrumentSans'; src: url('./_shared/fonts/InstrumentSans-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+  @font-face { font-family: 'InstrumentSans'; src: url('./_shared/fonts/InstrumentSans-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+  @font-face { font-family: 'GeistMono'; src: url('./_shared/fonts/GeistMono-Regular.ttf') format('truetype'); font-display: swap; }
+
+  :root {
+    --bg: #f0f2f7;
+    --bg2: #ffffff;
+    --ink: #131b2a;
+    --muted: #6b7785;
+    --rule: #e1e6ee;
+    --accent: #2d6cdf;
+    --accent2: #f0a020;
+    --pos: #1f9d6b;
+    --neg: #d64545;
+    --surface: #f7f9fc;
+    --brand1: #2d6cdf;  --brand2: #f0a020;  --brand3: #7c3aed;
+    --brand4: #0d9488;  --brand5: #dc2626;  --brand6: #0891b2;
+    --brand7: #ca8a04;  --brand8: #db2777;  --brand9: #16a34a;  --brand10: #6b7280;
+    /* 站点色 */
+    --c-us: #b31942;  --c-eu5: #0033a0;  --c-de: #ffce00;
+    --c-fr: #0055a4;  --c-it: #008c45;   --c-es: #ad1519;  --c-uk: #1a1a1a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'InstrumentSans', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.6; font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .topbar {
+    background: linear-gradient(135deg, #131b2a 0%, #1e2d47 100%);
+    color: #fff; padding: 1.4rem 2.5rem 1.2rem;
+  }
+  .topbar-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .topbar h1 { font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 700; letter-spacing: -0.01em; }
+  .topbar .sub { color: #9fb0c8; font-size: 0.8rem; margin-top: 0.3rem; display: flex; flex-wrap: wrap; gap: 1.1rem; }
+  .topbar .badge {
+    display: inline-block; background: rgba(45,108,223,0.25); color: #6fb0ff;
+    font-size: 0.68rem; font-weight: 700; padding: 2px 9px; border-radius: 100px; letter-spacing: 0.02em;
+  }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: rgba(255,255,255,0.1); color: #cfe0f5; font-size: 0.76rem; font-weight: 600;
+    padding: 5px 14px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.15);
+  }
+  .status-pill.ok { background: rgba(31,157,107,0.2); color: #9fe6c5; border-color: rgba(31,157,107,0.4); }
+  .status-pill.warn { background: rgba(240,160,32,0.18); color: #ffd98a; border-color: rgba(240,160,32,0.4); }
+  .status-pill.error { background: rgba(214,69,69,0.2); color: #ffb3b3; border-color: rgba(214,69,69,0.4); }
+  .status-pill.loading { background: rgba(45,108,223,0.2); color: #aaccff; }
+
+  .dropzone {
+    margin: 0.8rem 0 0; border: 2px dashed rgba(255,255,255,0.25); border-radius: 10px;
+    padding: 0.6rem 1.1rem; color: #9fb0c8; font-size: 0.78rem; cursor: pointer;
+    transition: all 0.18s; display: flex; align-items: center; gap: 0.55rem;
+  }
+  .dropzone:hover { border-color: rgba(255,255,255,0.5); color: #cfe0f5; background: rgba(255,255,255,0.04); }
+  .dropzone.over { border-color: #6fb0ff; background: rgba(45,108,223,0.18); color: #fff; }
+  .dropzone .dz-icon { font-size: 1.1rem; }
+  .dropzone strong { color: #6fb0ff; }
+  #file-input { display: none; }
+
+  .country-bar {
+    background: var(--bg2); border-bottom: 2px solid var(--rule);
+    padding: 0.5rem 2rem; position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+  }
+  .country-bar .cb-label { font-size: 0.76rem; color: var(--muted); font-weight: 600; margin-right: 0.3rem; }
+  .country-tab {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 5px 14px; border-radius: 8px; cursor: pointer;
+    font-size: 0.82rem; font-weight: 600; color: var(--muted);
+    background: transparent; border: 1px solid transparent; transition: all 0.15s;
+  }
+  .country-tab:hover { background: var(--surface); }
+  .country-tab.active {
+    background: var(--accent); color: #fff; border-color: var(--accent);
+    box-shadow: 0 1px 4px rgba(45,108,223,0.3);
+  }
+  .country-tab .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .country-tab .count { font-size: 0.68rem; opacity: 0.7; }
+  .country-tab.empty { opacity: 0.4; cursor: not-allowed; }
+  .country-tab.empty:hover { background: transparent; }
+
+  .wrap { max-width: 1320px; margin: 0 auto; padding: 1.2rem 2rem 3rem; }
+  section { margin-bottom: 2rem; }
+  .sec-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 0.9rem; border-bottom: 2px solid var(--rule); padding-bottom: 0.5rem;
+  }
+  .sec-head h2 { font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 700; color: var(--ink); letter-spacing: -0.01em; }
+  .sec-head h2::before { content: ''; display: inline-block; width: 4px; height: 1.05rem; background: var(--accent); margin-right: 0.55rem; vertical-align: -1px; border-radius: 2px; }
+  .sec-head .note { font-size: 0.76rem; color: var(--muted); }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .kpi { background: var(--bg2); border: 1px solid var(--rule); border-radius: 10px; padding: 1.05rem 1.2rem; position: relative; overflow: hidden; }
+  .kpi::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); }
+  .kpi.alt::before { background: var(--accent2); }
+  .kpi .label { font-size: 0.72rem; color: var(--muted); font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; }
+  .kpi .value { font-family: 'Outfit', sans-serif; font-size: 1.65rem; font-weight: 700; color: var(--ink); margin-top: 0.15rem; line-height: 1.1; letter-spacing: -0.02em; }
+  .kpi .value .unit { font-size: 0.85rem; font-weight: 400; color: var(--muted); margin-left: 2px; }
+  .kpi .delta { font-size: 0.78rem; font-weight: 600; margin-top: 0.3rem; }
+  .kpi .delta.pos { color: var(--pos); }
+  .kpi .delta.neg { color: var(--neg); }
+  .kpi .delta.neutral { color: var(--muted); }
+  .kpi .sub-text { font-size: 0.7rem; color: var(--muted); margin-top: 0.15rem; }
+
+  .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .chart-grid.single { grid-template-columns: 1fr; }
+  .chart-grid.single > .card { width: 100%; }
+  .card { background: var(--bg2); border: 1px solid var(--rule); border-radius: 10px; padding: 1.05rem 1.2rem 0.5rem; }
+  .card-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; }
+  .card-head h3 { font-family: 'Outfit', sans-serif; font-size: 0.92rem; font-weight: 700; color: var(--ink); }
+  .card-head .tag { font-size: 0.68rem; color: var(--muted); font-weight: 600; }
+  .chart-container { width: 100%; min-height: 380px; }
+  .chart-container.tall { min-height: 460px; }
+  .chart-container.short { min-height: 300px; }
+
+  .insight { background: var(--surface); border-left: 3px solid var(--accent2); border-radius: 6px; padding: 0.8rem 1.1rem; margin-top: 1rem; font-size: 0.84rem; color: var(--ink); }
+  .insight strong { color: var(--accent); }
+
+  .table-wrap { overflow-x: auto; overflow-y: auto; max-height: 460px; border: 1px solid var(--rule); border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  thead { position: sticky; top: 0; background: var(--surface); z-index: 2; }
+  th, td { padding: 0.48rem 0.72rem; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; position: sticky; left: 0; background: var(--bg2); }
+  thead th:first-child { background: var(--surface); }
+  th { font-weight: 600; color: var(--muted); font-size: 0.74rem; letter-spacing: 0.02em; }
+  tbody tr:hover { background: var(--surface); }
+  td.rank { font-family: 'GeistMono', monospace; color: var(--muted); font-weight: 700; }
+  td.brand { font-weight: 600; color: var(--ink); }
+  td.brand.hl { color: var(--accent2); }
+  .bar-cell { display: inline-block; height: 6px; background: var(--accent); border-radius: 3px; vertical-align: middle; margin-left: 6px; }
+
+  .custom-section { background: var(--surface); border: 2px dashed var(--rule); border-radius: 12px; padding: 1.5rem; margin-top: 0.5rem; }
+  .custom-section.has-data { border-style: solid; border-color: var(--accent); background: var(--bg2); }
+  .custom-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .custom-header h3 { font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--ink); }
+  .custom-header .hint { font-size: 0.76rem; color: var(--muted); }
+  .custom-placeholder { text-align: center; padding: 2rem 1rem; color: var(--muted); font-size: 0.85rem; }
+  .custom-placeholder .icon { font-size: 2rem; display: block; margin-bottom: 0.5rem; opacity: 0.4; }
+
+  footer { margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--rule); font-size: 0.78rem; color: var(--muted); }
+  .help-box { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 0.9rem 1.1rem; margin-top: 1rem; font-size: 0.8rem; color: var(--ink); }
+  .help-box h4 { font-family: 'Outfit', sans-serif; font-size: 0.9rem; margin-bottom: 0.4rem; }
+  .help-box code { font-family: 'GeistMono', monospace; background: var(--bg); padding: 1px 6px; border-radius: 4px; font-size: 0.78rem; color: var(--accent); }
+
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .chart-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .wrap { padding: 1.25rem 1rem 2rem; }
+    .topbar { padding: 1.2rem 1.25rem 1rem; }
+    .topbar h1 { font-size: 1.3rem; }
+    .kpi-grid { grid-template-columns: 1fr; }
+    .kpi .value { font-size: 1.4rem; }
+    .country-bar { padding: 0.5rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-row">
+    <div>
+      <h1>亚马逊全站点类目大盘看板</h1>
+      <div class="sub">
+        <span><span class="badge">类目</span> 智能割草机（含配件）</span>
+        <span><span class="badge">站点</span> US · EU5 · DE · FR · IT · ES · UK</span>
+        <span><span class="badge">模板</span> 拖入 Excel 即可刷新</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.5rem;align-items:center">
+      <span id="data-status" class="status-pill">等待数据…</span>
+      <button id="save-btn" style="background:rgba(31,157,107,0.25);color:#9fe6c5;border:1px solid rgba(31,157,107,0.4);border-radius:100px;padding:5px 16px;font-size:0.76rem;font-weight:600;cursor:pointer;transition:all 0.15s">💾 保存看板</button>
+    </div>
+  </div>
+  <div class="dropzone" id="dropzone">
+    <span class="dz-icon">📁</span>
+    <span><strong>拖入 Excel 文件</strong> 自动识别站点 · 或点击选择文件</span>
+    <input type="file" id="file-input" accept=".xlsx,.xls">
+  </div>
+</header>
+
+<div class="country-bar" id="country-bar"><span class="cb-label">切换站点：</span><span class="country-tab active" data-site="US"><span class="dot" style="background:var(--c-us)"></span>美国</span><span class="country-tab empty" data-site="EU5" title="暂无数据，拖入Excel后自动激活"><span class="dot" style="background:var(--c-eu5)"></span>EU5合计 <span class="count">(空)</span></span><span class="country-tab empty" data-site="DE" title="暂无数据，拖入Excel后自动激活"><span class="dot" style="background:var(--c-de);border:1px solid #ccc"></span>德国 <span class="count">(空)</span></span><span class="country-tab empty" data-site="FR" title="暂无数据，拖入Excel后自动激活"><span class="dot" style="background:var(--c-fr)"></span>法国 <span class="count">(空)</span></span><span class="country-tab empty" data-site="IT" title="暂无数据，拖入Excel后自动激活"><span class="dot" style="background:var(--c-it)"></span>意大利 <span class="count">(空)</span></span><span class="country-tab empty" data-site="ES" title="暂无数据，拖入Excel后自动激活"><span class="dot" style="background:var(--c-es)"></span>西班牙 <span class="count">(空)</span></span><span class="country-tab empty" data-site="UK" title="暂无数据，拖入Excel后自动激活"><span class="dot" style="background:var(--c-uk)"></span>英国 <span class="count">(空)</span></span></div>
+
+<div class="wrap">
+
+  <section>
+    <div class="sec-head"><h2>核心指标概览</h2><span class="note" id="kpi-note">所有指标随数据自动更新</span></div>
+    <div class="kpi-grid" id="kpi-grid"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>大盘体量与趋势</h2><span class="note">含配件 · 三年月度对比 + 同比增速</span></div>
+    <div class="chart-grid">
+      <div class="card"><div class="card-head"><h3>大盘月度销量趋势（台）</h3><span class="tag">三年对比</span></div><div id="chart-units-trend" class="chart-container"></div></div>
+      <div class="card"><div class="card-head"><h3 id="gms-title">大盘月度销额趋势（USD）</h3><span class="tag">三年对比</span></div><div id="chart-gms-trend" class="chart-container"></div></div>
+    </div>
+    <div class="chart-grid single">
+      <div class="card"><div class="card-head"><h3>大盘月度同比增速（YOY）</h3><span class="tag">最新年 vs 上年同期</span></div><div id="chart-yoy" class="chart-container short"></div></div>
+    </div>
+    <div class="insight" id="insight-trend"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>竞对市占格局</h2><span class="note">10大主流品牌 · 多折线（点击图例可筛选）</span></div>
+    <div class="chart-grid single">
+      <div class="card"><div class="card-head"><h3>各品牌月度市占率变化</h3><span class="tag">多折线 · 前5品牌加粗</span></div><div id="chart-share-trend" class="chart-container tall"></div></div>
+    </div>
+    <div class="chart-grid single">
+      <div class="card"><div class="card-head"><h3>各品牌月度 GMV 趋势</h3><span class="tag">多折线</span></div><div id="chart-gmv-trend" class="chart-container tall"></div></div>
+    </div>
+    <div class="chart-grid single">
+      <div class="card"><div class="card-head"><h3>最新月品牌 GMV 对比</h3><span class="tag">横向柱状</span></div><div id="chart-gmv-latest" class="chart-container"></div></div>
+    </div>
+    <div class="insight" id="insight-comp"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>品牌 YTD 排名</h2><span class="note">含全部在售品牌 · 按销量/销额降序</span></div>
+    <div class="chart-grid">
+      <div class="card"><div class="card-head"><h3>YTD 销量 TOP 15</h3><span class="tag">台</span></div><div id="chart-rank-units" class="chart-container tall"></div></div>
+      <div class="card"><div class="card-head"><h3 id="rank-gms-title">YTD 销额 TOP 15</h3><span class="tag"></span></div><div id="chart-rank-gms" class="chart-container tall"></div></div>
+    </div>
+    <div class="card" style="margin-top:1rem">
+      <div class="card-head"><h3 id="tbl-title">品牌 YTD 销额明细表</h3><span class="tag">完整榜单</span></div>
+      <div class="table-wrap">
+        <table id="tbl-gms"><thead><tr><th>#</th><th>品牌</th><th id="tbl-gms-cur">YTD销额(USD)</th><th>占比</th><th></th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+    <div class="insight" id="insight-rank"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Mammotion 重点品牌表现</h2><span class="note">仅主机 · 含市占率</span></div>
+    <div class="chart-grid">
+      <div class="card"><div class="card-head"><h3>Mammotion 月度销量与销额市占</h3><span class="tag">双轴</span></div><div id="chart-mm-dual" class="chart-container"></div></div>
+      <div class="card"><div class="card-head"><h3>Mammotion 销额市占率趋势</h3><span class="tag">三年对比</span></div><div id="chart-mm-share" class="chart-container"></div></div>
+    </div>
+    <div class="insight" id="insight-mm"></div>
+  </section>
+
+  <!-- 非季节性产品大盘趋势一览（US 专属静态板块） -->
+  <section id="nonseasonal-section" style="display:none">
+    <div class="sec-head"><h2>非季节性产品大盘趋势一览</h2><span class="note">Robotic Vacuums · Amazon US · 数据来源 QuickSight</span></div>
+
+    <!-- 核心：大盘规模走势趋势图（全宽） -->
+    <div class="chart-grid single">
+      <div class="card">
+        <div class="card-head"><h3>大盘规模走势（相对指数，2025=100）</h3><span class="tag">Total GMS / 3P Total / CN 3P</span></div>
+        <div id="chart-ns-trend" class="chart-container tall"></div>
+      </div>
+    </div>
+    <div class="insight" style="margin-top:0.5rem">
+      <strong>走势解读：</strong>Total GMS 于 2025 年达到峰值，2026 年（YTD）较 2025 年有所回落，但仍高于 2024 年基期。3P Total 与 CN 3P 走势与大盘同步，2025 年增速最快，2026 年增长放缓。3P 模式占比明显高于 Retail 自营，该类目以第三方卖家运营为主导。
+    </div>
+
+
+    <!-- 图1：月度净订单量同比对比 -->
+    <div class="chart-grid single" style="margin-top:1rem">
+      <div class="card">
+        <div class="card-head"><h3>月度净订单量同比对比（估算指数）</h3><span class="tag">2024 / 2025 / 2026</span></div>
+        <div id="chart-ns-orders" class="chart-container tall"></div>
+      </div>
+    </div>
+    <div class="insight" style="margin-top:0.5rem">
+      <strong>季节性规律：</strong>全年呈双峰结构——6–7 月（Prime Day）和 10–11 月（黑五网一）为两个高峰，8–9 月为低谷。2025 年量级最高，2026 年节奏提前（6 月即达高点）但峰值低于 2025。CN/ROA 卖家季节性峰值幅度大于 Domestic，中国卖家更依赖大促拉量。
+    </div>
+
+    <!-- KPI 卡片 -->
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-top:1rem">
+      <div class="kpi"><div class="label">大盘 GMS 体量</div><div class="value">~$480<span class="unit">M</span></div><div class="sub-text">CN 渗透 PE ≈ 0.46</div></div>
+      <div class="kpi alt"><div class="label">2025 峰值 / 2026 YTD</div><div class="value">见顶<span class="unit">·回调</span></div><div class="sub-text">2026 仍高于 2024 基期</div></div>
+      <div class="kpi"><div class="label">中国品牌合计份额</div><div class="value">55.4<span class="unit">%</span></div><div class="sub-text">roborock + dreame + ECOVACS 等</div></div>
+      <div class="kpi alt"><div class="label">FBA 物流占比</div><div class="value">>90<span class="unit">%</span></div><div class="sub-text">头部品牌基本全 FBA</div></div>
+    </div>
+
+    <!-- 品牌格局表格 -->
+    <div class="card" style="margin-top:1rem">
+      <div class="card-head"><h3>品牌份额格局（最新月度）</h3><span class="tag">Brand Share Monitor</span></div>
+      <div class="table-wrap" style="max-height:none">
+        <table>
+          <thead><tr><th style="text-align:left">#</th><th style="text-align:left">品牌</th><th style="text-align:left">归属</th><th>综合份额</th><th>可视化</th></tr></thead>
+          <tbody>
+            <tr><td class="rank">1</td><td class="brand hl">roborock（石头）</td><td style="text-align:left">中国品牌</td><td class="accent" style="text-align:right">30.2%</td><td><span class="bar-cell" style="width:120px"></span></td></tr>
+            <tr><td class="rank">2</td><td class="brand">iRobot</td><td style="text-align:left">欧美品牌</td><td style="text-align:right">12.9%</td><td><span class="bar-cell" style="width:52px"></span></td></tr>
+            <tr><td class="rank">3</td><td class="brand">dreame（追觅）</td><td style="text-align:left">中国品牌</td><td style="text-align:right">12.0%</td><td><span class="bar-cell" style="width:48px"></span></td></tr>
+            <tr><td class="rank">4</td><td class="brand">Shark</td><td style="text-align:left">欧美品牌</td><td style="text-align:right">10.8%</td><td><span class="bar-cell" style="width:43px"></span></td></tr>
+            <tr><td class="rank">5</td><td class="brand">ECOVACS（科沃斯）</td><td style="text-align:left">中国品牌</td><td style="text-align:right">6.2%</td><td><span class="bar-cell" style="width:25px"></span></td></tr>
+            <tr><td class="rank">6</td><td class="brand">MOVA</td><td style="text-align:left">中国品牌</td><td style="text-align:right">3.3%</td><td><span class="bar-cell" style="width:13px"></span></td></tr>
+            <tr><td class="rank">7</td><td class="brand">NARWAL（云鲸）</td><td style="text-align:left">中国品牌</td><td style="text-align:right">1.9%</td><td><span class="bar-cell" style="width:8px"></span></td></tr>
+            <tr><td class="rank">8</td><td class="brand">LEFANT</td><td style="text-align:left">中国品牌</td><td style="text-align:right">1.8%</td><td><span class="bar-cell" style="width:7px"></span></td></tr>
+            <tr><td class="rank">—</td><td style="color:var(--muted)">其他品牌合计</td><td style="text-align:left">—</td><td style="text-align:right;color:var(--muted)">20.9%</td><td><span class="bar-cell" style="width:84px;background:var(--muted)"></span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <!-- 图2：品牌份额变化趋势 -->
+    <div class="chart-grid single" style="margin-top:1rem">
+      <div class="card">
+        <div class="card-head"><h3>品牌份额变化趋势</h3><span class="tag">2024.05 – 2025.07</span></div>
+        <div id="chart-ns-brandshare" class="chart-container tall"></div>
+      </div>
+    </div>
+    <div class="insight" style="margin-top:0.5rem">
+      <strong>竞争格局：</strong>roborock 稳居第一（~30%），iRobot 从 32% 持续下滑至 13%，dreame 从 3% 快速攀升至 11%，eufy 从 20% 萎缩至 7%。市场已从「欧美品牌主导」转为「中国品牌合力挤压 iRobot、Shark」的格局。
+    </div>
+
+    <!-- 季节性 & 渗透 要点 -->
+    <div class="chart-grid" style="grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem">
+      <div class="card">
+        <div class="card-head"><h3>季节性规律</h3><span class="tag">双峰结构</span></div>
+        <div style="padding:0.5rem 0 0.8rem;font-size:0.82rem;line-height:1.7">
+          <p style="margin-bottom:0.5rem"><strong style="color:var(--accent2)">6–7 月（Prime Day）</strong>：2026 年高点提前至 6 月，但峰值低于 2024/2025 年 7 月——节奏提前而非量级超越。</p>
+          <p><strong style="color:var(--accent2)">10–11 月（黑五网一）</strong>：历年稳定高点，2024/2025 年 11 月均为全年最高值。</p>
+          <p style="margin-top:0.5rem;color:var(--muted)">CN/ROA 卖家季节性峰值幅度大于 Domestic，中国卖家更依赖大促拉量。</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>中国卖家渗透</h3><span class="tag">持续走高</span></div>
+        <div style="padding:0.5rem 0 0.8rem;font-size:0.82rem;line-height:1.7">
+          <p style="margin-bottom:0.5rem"><strong style="color:var(--accent)">CN 渗透率</strong>整体呈上升趋势，2025 年提速明显。</p>
+          <p style="margin-bottom:0.5rem">household-robotic-vacuums 子类目渗透率约 <strong>0.46</strong>，市场容量约 <strong>4.8 亿美元</strong>。</p>
+          <p>竞争已从「欧美品牌主导」转为「中国品牌合力挤压 iRobot、Shark」的格局。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight">
+      <strong>总结：</strong>household-robotic-vacuums 大盘 2025 年见顶、2026 年温和回调；CN 卖家渗透率持续走高，中国品牌合计份额 55.4% 已超欧美品牌 23.7%。大促（Prime Day + 黑五网一）是全年最核心两个流量窗口，建议持续跟踪 roborock、dreame、ECOVACS 的月度份额变化作为竞对监控核心对象。
+    </div>
+    </section>
+
+  <section>
+    <div class="sec-head"><h2>自定义数据板块</h2><span class="note">放置额外指标 · 自由格式</span></div>
+    <div class="custom-section" id="custom-section">
+      <div class="custom-header">
+        <h3>自定义数据</h3>
+        <span class="hint" id="custom-hint">在 Excel 中添加 {站点}_Custom 工作表即可自动显示</span>
+      </div>
+      <div class="custom-placeholder" id="custom-placeholder">
+        <span class="icon">📊</span>
+        <p>当前站点暂无自定义数据</p>
+        <p style="margin-top:0.3rem;font-size:0.78rem">在 Excel 文件中添加工作表（命名格式：<code style="font-family:'GeistMono',monospace;background:var(--bg);padding:1px 6px;border-radius:4px;font-size:0.76rem;color:var(--accent)">US_Custom</code> / <code style="font-family:'GeistMono',monospace;background:var(--bg);padding:1px 6px;border-radius:4px;font-size:0.76rem;color:var(--accent)">DE_Custom</code> 等），首行为列名，后续行为数据，本板块将自动渲染表格与图表。</p>
+      </div>
+      <div id="custom-content" style="display:none">
+        <div class="chart-grid">
+          <div class="card"><div class="card-head"><h3>自定义数据图表</h3><span class="tag" id="custom-chart-tag">柱状图</span></div><div id="chart-custom" class="chart-container"></div></div>
+          <div class="card"><div class="card-head"><h3>自定义数据明细</h3><span class="tag">表格</span></div><div class="table-wrap" style="max-height:380px"><table id="tbl-custom"><thead></thead><tbody></tbody></table></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="help-box">
+    <h4>如何使用全站点模板</h4>
+    <p style="margin-bottom:0.5rem"><strong>US 数据：</strong>Excel 中使用不带前缀的原始工作表名（<code>大盘数据</code>、<code>竞对GMV和市占</code>、<code>Brand_Share_Monitor</code>），或使用 <code>US_</code> 前缀。货币显示为 USD ($)。</p>
+    <p style="margin-bottom:0.5rem"><strong>EU 数据：</strong>每个国家使用 <code>{国家}_</code> 前缀的工作表（如 <code>DE_大盘数据</code>、<code>FR_竞对GMV和市占</code>）。EU5合计使用 <code>EU5_</code> 前缀。货币显示为 EUR (€)。</p>
+    <p style="margin-bottom:0.5rem"><strong>站点代码：</strong>US（美国）、EU5（欧洲5国合计）、DE（德国）、FR（法国）、IT（意大利）、ES（西班牙）、UK（英国）。</p>
+    <p style="margin-bottom:0.5rem"><strong>自定义板块：</strong>添加 <code>{站点}_Custom</code> 工作表，首行为列名，后续行为数据。</p>
+    <p style="margin-bottom:0.5rem"><strong>刷新方式：</strong>直接拖入新 Excel 文件到顶部虚线框，全部图表即时刷新，无需任何操作。</p>
+    <p style="color:var(--muted)">每个工作表需保持原模板结构。支持任意月数，新增月份后会自动纳入。</p>
+  </div>
+
+  <footer>
+    <p>说明：市占率基于销额(GMS)计算；Mammotion 主机体量不含配件；YTD 指年内累计；US 货币为 USD，EU 货币为 EUR。</p>
+  </footer>
+
+</div>
+
+<script src="./_shared/js/echarts.min.js"></script>
+<script src="./_shared/js/xlsx.full.min.js"></script>
+<script src="assets/parse_excel.js"></script>
+<script src="assets/charts.js"></script>
+<script src="assets/app.js"></script>
+
+
+</body></html>
