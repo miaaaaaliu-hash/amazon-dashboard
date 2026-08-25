@@ -92,17 +92,21 @@ window.DashboardCharts = (function () {
     var U = D.market.units, G = D.market.gms;
     var u26 = U['2026'] || [], g26 = G['2026'] || [];
     var u25 = U['2025'] || [], g25 = G['2025'] || [];
-    var n = Math.min(u26.length, g26.length, u25.length, g25.length);
-    var sumG26 = g26.slice(0, n).reduce(function (a, b) { return a + (b || 0); }, 0);
-    var sumG25 = g25.slice(0, n).reduce(function (a, b) { return a + (b || 0); }, 0);
-    var sumU26 = u26.slice(0, n).reduce(function (a, b) { return a + (b || 0); }, 0);
-    var sumU25 = u25.slice(0, n).reduce(function (a, b) { return a + (b || 0); }, 0);
+    // 销额和销量独立计算月数，避免一方为空导致全部清零
+    var nG = Math.min(g26.length, g25.length);
+    var nU = Math.min(u26.length, u25.length);
+    var sumG26 = g26.slice(0, nG).reduce(function (a, b) { return a + (b || 0); }, 0);
+    var sumG25 = g25.slice(0, nG).reduce(function (a, b) { return a + (b || 0); }, 0);
+    var sumU26 = u26.slice(0, nU).reduce(function (a, b) { return a + (b || 0); }, 0);
+    var sumU25 = u25.slice(0, nU).reduce(function (a, b) { return a + (b || 0); }, 0);
     var gmsYoY = sumG25 > 0 ? (sumG26 / sumG25 - 1) : 0;
     var unitsYoY = sumU25 > 0 ? (sumU26 / sumU25 - 1) : 0;
     var g26Total = G['2026_total'] || sumG26;
     var g25Total = G['2025_total'] || 0;
     var g24Total = G['2024_total'] || 0;
     var yoy25 = g24Total > 0 ? (g25Total / g24Total - 1) : 0;
+    // KPI 显示用月数：优先销额月数
+    var n = nG || nU;
 
     var mmYtd = D.competitor.ytd_26_share;
     var mmYtd25 = D.competitor.ytd_25_share;
