@@ -2,6 +2,7 @@
 sync_data.py
 deploy_gist.py
 sync_config.json
+sync_feishu.py
 
 # Uploads and temp files
 *.pyc

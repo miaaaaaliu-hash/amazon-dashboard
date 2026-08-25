@@ -200,8 +200,8 @@ window.DashboardCharts = (function () {
       xAxis: Object.assign({ type: 'category', data: ym }, axisBase(), { splitLine: { show: false } }),
       yAxis: Object.assign({ type: 'value', name: '同比', axisLabel: { formatter: function (v) { return (v * 100).toFixed(0) + '%'; } } }, axisBase()),
       series: [
-        { name: '销量YOY', type: 'bar', data: D.market.units.yoy || [], barWidth: 18, itemStyle: { color: function (p) { return p.value >= 0 ? STYLE.accent + 'cc' : STYLE.neg; }, borderRadius: [3, 3, 0, 0] } },
-        { name: '销额YOY', type: 'bar', data: D.market.gms.yoy || [], barWidth: 18, itemStyle: { color: function (p) { return p.value >= 0 ? STYLE.accent2 + 'cc' : STYLE.neg; }, borderRadius: [3, 3, 0, 0] } }
+        { name: '销量YOY', type: 'bar', data: D.market.units.yoy || [], barWidth: 18, itemStyle: { color: STYLE.accent, borderRadius: [3, 3, 0, 0] } },
+        { name: '销额YOY', type: 'bar', data: D.market.gms.yoy || [], barWidth: 18, itemStyle: { color: STYLE.accent2, borderRadius: [3, 3, 0, 0] } }
       ]
     });
   }
@@ -318,9 +318,27 @@ window.DashboardCharts = (function () {
     var c = init('chart-mm-dual'); if (!c) return;
     var labels = [], unitsData = [], shareData = [];
     var ms = D.months; var i;
-    for (i = 0; i < 12; i++) { if ((D.mammotion.units['2024'] || [])[i] != null) { labels.push('24年' + ms[i]); unitsData.push(D.mammotion.units['2024'][i]); shareData.push((D.mammotion.share_g['2024'] || [])[i]); } }
-    for (i = 0; i < 12; i++) { if ((D.mammotion.units['2025'] || [])[i] != null) { labels.push('25年' + ms[i]); unitsData.push(D.mammotion.units['2025'][i]); shareData.push((D.mammotion.share_g['2025'] || [])[i]); } }
-    for (i = 0; i < 12; i++) { if ((D.mammotion.units['2026'] || [])[i] != null) { labels.push('26年' + ms[i]); unitsData.push(D.mammotion.units['2026'][i]); shareData.push((D.mammotion.share_g['2026'] || [])[i]); } }
+    // 检测是否为非US站点（units 2024 前4个月无数据 → 从5月开始）
+    var u24 = D.mammotion.units['2024'] || [];
+    var hasEarlyUnits = false;
+    for (i = 0; i < 4; i++) { if (u24[i] != null) { hasEarlyUnits = true; break; } }
+    var startIdx = hasEarlyUnits ? 0 : 4;
+    // 2024年从 startIdx 开始，2025/2026 从1月开始
+    for (i = startIdx; i < 12; i++) {
+      var u = (D.mammotion.units['2024'] || [])[i];
+      var s = (D.mammotion.share_g['2024'] || [])[i];
+      if (u != null || s != null) { labels.push('24年' + ms[i]); unitsData.push(u != null ? u : null); shareData.push(s != null ? s : null); }
+    }
+    for (i = 0; i < 12; i++) {
+      var u2 = (D.mammotion.units['2025'] || [])[i];
+      var s2 = (D.mammotion.share_g['2025'] || [])[i];
+      if (u2 != null || s2 != null) { labels.push('25年' + ms[i]); unitsData.push(u2 != null ? u2 : null); shareData.push(s2 != null ? s2 : null); }
+    }
+    for (i = 0; i < 12; i++) {
+      var u3 = (D.mammotion.units['2026'] || [])[i];
+      var s3 = (D.mammotion.share_g['2026'] || [])[i];
+      if (u3 != null || s3 != null) { labels.push('26年' + ms[i]); unitsData.push(u3 != null ? u3 : null); shareData.push(s3 != null ? s3 : null); }
+    }
     c.setOption({
       animation: false, tooltip: tip({}), legend: { data: ['销量(台)', '销额市占'], top: 0, right: 10, textStyle: { color: STYLE.muted, fontSize: 11 }, itemWidth: 14, itemHeight: 8 },
       grid: { top: 36, left: 48, right: 52, bottom: 60 },
