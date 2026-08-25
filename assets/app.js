@@ -21,7 +21,7 @@ var DATA_SOURCE_URL = 'https://gist.githubusercontent.com/miaaaaaliu-hash/eacf57
     FR:  { name: '法国',     currency: '€',  currencyName: 'EUR', color: 'var(--c-fr)',  border: false },
     IT:  { name: '意大利',   currency: '€',  currencyName: 'EUR', color: 'var(--c-it)',  border: false },
     ES:  { name: '西班牙',   currency: '€',  currencyName: 'EUR', color: 'var(--c-es)',  border: false },
-    UK:  { name: '英国',     currency: '€',  currencyName: 'EUR', color: 'var(--c-uk)',  border: false }
+    UK:  { name: '英国',     currency: '£',  currencyName: 'GBP', color: 'var(--c-uk)',  border: false }
   };
 
   var store = {
