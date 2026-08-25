@@ -90,8 +90,8 @@ var DATA_SOURCE_URL = 'https://gist.githubusercontent.com/miaaaaaliu-hash/eacf57
       setStatus('当前站点 ' + (info.name || site) + ' 暂无数据', 'warn');
       return;
     }
-    // 渲染主看板（传入货币信息）
-    DashboardCharts.renderAll(D, info.currency, info.currencyName);
+    // 渲染主看板（传入货币信息和站点名称）
+    DashboardCharts.renderAll(D, info.currency, info.currencyName, site);
     // 渲染自定义板块
     var customData = store.custom[site];
     DashboardCharts.renderCustom(customData, info.currency);

@@ -314,15 +314,12 @@ window.DashboardCharts = (function () {
     });
   }
 
-  function chartMmDual(D) {
+  function chartMmDual(D, siteName) {
     var c = init('chart-mm-dual'); if (!c) return;
     var labels = [], unitsData = [], shareData = [];
     var ms = D.months; var i;
-    // 检测是否为非US站点（units 2024 前4个月无数据 → 从5月开始）
-    var u24 = D.mammotion.units['2024'] || [];
-    var hasEarlyUnits = false;
-    for (i = 0; i < 4; i++) { if (u24[i] != null) { hasEarlyUnits = true; break; } }
-    var startIdx = hasEarlyUnits ? 0 : 4;
+    // 非US站点从5月开始，US从1月开始
+    var startIdx = (siteName === 'US') ? 0 : 4;
     // 2024年从 startIdx 开始，2025/2026 从1月开始
     for (i = startIdx; i < 12; i++) {
       var u = (D.mammotion.units['2024'] || [])[i];
@@ -565,7 +562,7 @@ window.DashboardCharts = (function () {
     });
   }
 
-  function renderAll(D, currency, currencyName) {
+  function renderAll(D, currency, currencyName, siteName) {
     readStyle();
     CUR = currency || '$';
     CUR_NAME = currencyName || 'USD';
@@ -574,7 +571,7 @@ window.DashboardCharts = (function () {
     registry = [];
     renderKPI(D); chartUnitsTrend(D); chartGmsTrend(D); chartYoY(D);
     chartShareTrend(D); chartGmvTrend(D); chartGmvLatest(D);
-    chartRankUnits(D); chartRankGms(D); chartMmDual(D); chartMmShare(D);
+    chartRankUnits(D); chartRankGms(D); chartMmDual(D, siteName); chartMmShare(D);
     renderTable(D); renderInsights(D);
     chartNsTrend();
     chartNsOrders();
