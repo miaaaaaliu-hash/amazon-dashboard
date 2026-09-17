@@ -86,6 +86,9 @@ var DATA_SOURCE_URL = 'https://gist.githubusercontent.com/miaaaaaliu-hash/eacf57
     // 非季节性产品大盘趋势一览：仅 US 显示
     var nsSection = document.getElementById('nonseasonal-section');
     if (nsSection) nsSection.style.display = (site === 'US') ? '' : 'none';
+    // 自定义数据板块2（扫地机器人大盘数据速览）：仅 US 显示
+    var r2Section = document.getElementById('report2-section');
+    if (r2Section) r2Section.style.display = (site === 'US') ? '' : 'none';
     if (!D) {
       setStatus('当前站点 ' + (info.name || site) + ' 暂无数据', 'warn');
       return;
