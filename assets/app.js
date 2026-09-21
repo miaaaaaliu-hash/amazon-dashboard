@@ -8,7 +8,7 @@
    支持的托管：GitHub Gist raw URL、GitHub Pages、
    阿里云 OSS / 腾讯 COS 公开链接、任何 CORS 允许的 JSON URL
    ============================================================ */
-var DATA_SOURCE_URL = 'https://gist.githubusercontent.com/miaaaaaliu-hash/eacf576016095d87eb32cb1358217553/raw/data.json';
+var DATA_SOURCE_URL = 'https://miaaaaaliu-hash.github.io/amazon-dashboard/data.json';
 
 (function () {
   // 站点顺序：US → EU5 → DE → FR → IT → ES → UK
