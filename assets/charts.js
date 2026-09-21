@@ -385,7 +385,7 @@ window.DashboardCharts = (function () {
     var total = list.reduce(function (s, d) { return s + d.gms; }, 0);
     var maxG = list[0].gms;
     list.forEach(function (d, idx) {
-      var pct = (d.gms / total * 100);
+      var pct = (d.share != null ? d.share * 100 : (total > 0 ? d.gms / total * 100 : 0));
       var tr = document.createElement('tr');
       var isMM = d.brand === 'Mammotion';
       var barW = Math.max(2, (d.gms / maxG * 120));
