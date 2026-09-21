@@ -289,6 +289,12 @@ window.DashboardCharts = (function () {
   function chartRankUnits(D) {
     var c = init('chart-rank-units'); if (!c) return;
     var list = (D.ranking.ytd_units || []).slice(0, 15).slice().reverse();
+    // 如果有"无更新"标注，在图表上方显示
+    var notes = D.data_notes || {};
+    if (notes.ytd_units) {
+      var tag = document.querySelector('#chart-rank-units').closest('.card').querySelector('.tag');
+      if (tag) tag.textContent = notes.ytd_units;
+    }
     c.setOption({
       animation: false,
       tooltip: tip({ valueFormatter: function (v) { return v + ' 台'; } }),
@@ -417,8 +423,11 @@ window.DashboardCharts = (function () {
     }
     var el3 = document.getElementById('insight-rank'); if (el3) {
       var yg = D.ranking.ytd_gms || [], yu = D.ranking.ytd_units || [];
-      el3.innerHTML = '<strong>排名洞察：</strong>销额维度 ' + (yg[0] ? yg[0].brand + ' 以' + CUR + (yg[0].gms / 1e6).toFixed(1) + 'M居首' : '-') +
-        '，但销量维度 ' + (yu[0] ? yu[0].brand + '（' + yu[0].units + '台）领先' : '-') +
+      var notes = D.data_notes || {};
+      var unitsNote = notes.ytd_units ? ' <span style="color:var(--neg);font-size:0.8rem">（销量数据' + notes.ytd_units + '）</span>' : '';
+      var gmsNote = notes.ytd_gms ? ' <span style="color:var(--muted);font-size:0.8rem">（' + notes.ytd_gms + '）</span>' : '';
+      el3.innerHTML = '<strong>排名洞察：</strong>销额维度 ' + (yg[0] ? yg[0].brand + ' 以' + CUR + (yg[0].gms / 1e6).toFixed(1) + 'M居首' : '-') + gmsNote +
+        '，但销量维度 ' + (yu[0] ? yu[0].brand + '（' + yu[0].units + '台）领先' : '-') + unitsNote +
         '，反映<strong>定价策略差异</strong>。';
     }
     var el4 = document.getElementById('insight-mm'); if (el4) {
